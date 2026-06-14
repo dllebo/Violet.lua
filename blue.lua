@@ -1531,9 +1531,9 @@ end,
         
         -- Сюда мы закладываем код каждого софта прямо в RAW формате (внутри огромных строк)
         local RawScripts = {
-            ["Синяя"] = [[
+            ["Фиолетовая"] = [[
 loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/violete.lua"))()
-                print("Загружена Синяя тема!")
+                print("Загружена Фиолетовая тема!")
                 -- Пример: loadstring(game:HttpGet("ссылка"))() если всё же захочешь отсюда вызвать гитхаб,
                 -- но лучше вставить сюда весь код целиком от первой до последней строчки.
             ]],
@@ -1625,7 +1625,7 @@ for slotName, slotCode in pairs(Slots) do
         elseif func == "Distance" then
             BuildSlider(tab, func, 5, 100, 25)
         elseif func == "ThemeSelect" then
-            BuildDropdown(tab, func, {"Синяя", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
+            BuildDropdown(tab, func, {"Фиолетовая", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
         elseif func == "VisualJitterSpin" then
             BuildCheckbox(tab, func)
         elseif func == "NoclipFly" then

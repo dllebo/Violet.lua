@@ -1539,7 +1539,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/ref
             ]],
             
             ["Красная"] = [[
-loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/Red.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/red.lua"))()
                 print("Загружена Красная тема!")
             ]],
             
