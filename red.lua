@@ -1585,14 +1585,14 @@ end,
         -- Сюда мы закладываем код каждого софта прямо в RAW формате (внутри огромных строк)
         local RawScripts = {
             ["Фиолетовая"] = [[
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Gaze%20emote"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/violete.lua"))()
                 print("Загружена Фиолетовая тема!")
                 -- Пример: loadstring(game:HttpGet("ссылка"))() если всё же захочешь отсюда вызвать гитхаб,
                 -- но лучше вставить сюда весь код целиком от первой до последней строчки.
             ]],
             
             ["Красная"] = [[
-                -- СЮДА ВСТАВЛЯЕШЬ ПОЛНУЮ КОПИЮ СВОЕГО СКРИПТА, НО С КРАСНЫМИ ЦВЕТАМИ
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/red.lua"))()
                 print("Загружена Красная тема!")
             ]],
             
