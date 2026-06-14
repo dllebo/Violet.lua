@@ -5,6 +5,17 @@
 if game.CoreGui:FindFirstChild("HvH_Private_Menu") then
     game.CoreGui["HvH_Private_Menu"]:Destroy()
 end
+-- Очистка старых ESP при переключении тем или перезапуске
+if getgenv().ESP_Cache then
+    for _, drawingElement in ipairs(getgenv().ESP_Cache) do
+        pcall(function()
+            drawingElement.Visible = false
+            drawingElement:Remove()
+        end)
+    end
+end
+getgenv().ESP_Cache = {}
+
 
 getgenv().Config = {}
 local ScreenGui = Instance.new("ScreenGui")
@@ -358,11 +369,22 @@ local function CreateTabButton(tabName)
 end
 
 local Slots = {
-       ["ESP_Box"] = function()
+    ["ESP_Box"] = function()
+        -- Создаем глобальную функцию очистки, если её ещё нет
+        if not getgenv().ESP_Cache then getgenv().ESP_Cache = {} end
+        getgenv().ClearOldESP = function()
+            for _, item in ipairs(getgenv().ESP_Cache) do
+                pcall(function() item.Visible = false item:Remove() end)
+            end
+            getgenv().ESP_Cache = {}
+        end
+        getgenv().ClearOldESP() -- Очищаем старое перед запуском
+
         local function CreateBox(player)
             if player == game.Players.LocalPlayer then return end
             local Box = Drawing.new("Square")
-            Box.Color = Color3.fromRGB(165, 30, 255) -- ФИОЛЕТОВЫЕ КВАДРАТЫ ESP
+            table.insert(getgenv().ESP_Cache, Box) -- Запись в кэш для очистки
+            Box.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
             Box.Thickness = 2
             Box.Filled = false
             Box.Visible = false
@@ -394,7 +416,8 @@ local Slots = {
         local function CreateFill(player)
             if player == game.Players.LocalPlayer then return end
             local Fill = Drawing.new("Square")
-            Fill.Color = Color3.fromRGB(165, 30, 255) -- ФИОЛЕТОВАЯ ЗАЛИВКА ESP
+            table.insert(getgenv().ESP_Cache, Fill) -- Запись в кэш
+            Fill.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
             Fill.Thickness = 0
             Fill.Filled = true
             Fill.Transparency = 0.25
@@ -427,6 +450,7 @@ local Slots = {
         local function CreateHealthBar(player)
             if player == game.Players.LocalPlayer then return end
             local GreenBar = Drawing.new("Line")
+            table.insert(getgenv().ESP_Cache, GreenBar) -- Запись в кэш
             GreenBar.Thickness = 2
             GreenBar.Visible = false
 
@@ -471,6 +495,7 @@ local Slots = {
         local function CreateNameESP(player)
             if player == game.Players.LocalPlayer then return end
             local Text = Drawing.new("Text")
+            table.insert(getgenv().ESP_Cache, Text) -- Запись в кэш
             Text.Color = Color3.fromRGB(255, 255, 255)
             Text.Size = 16
             Text.Center = true
@@ -504,7 +529,8 @@ local Slots = {
         local function CreateTracer(player)
             if player == game.Players.LocalPlayer then return end
             local Line = Drawing.new("Line")
-            Line.Color = Color3.fromRGB(165, 30, 255) -- ФИОЛЕТОВЫЕ ЛИНИИ ТРЕЙСЕРОВ
+            table.insert(getgenv().ESP_Cache, Line) -- Запись в кэш
+            Line.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
             Line.Thickness = 1.5
             Line.Visible = false
 

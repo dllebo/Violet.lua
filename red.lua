@@ -5,6 +5,17 @@
 if game.CoreGui:FindFirstChild("HvH_Private_Menu") then
     game.CoreGui["HvH_Private_Menu"]:Destroy()
 end
+-- Очистка старых ESP при переключении тем или перезапуске
+if getgenv().ESP_Cache then
+    for _, drawingElement in ipairs(getgenv().ESP_Cache) do
+        pcall(function()
+            drawingElement.Visible = false
+            drawingElement:Remove()
+        end)
+    end
+end
+getgenv().ESP_Cache = {}
+
 
 getgenv().Config = {}
 local ScreenGui = Instance.new("ScreenGui")
@@ -359,10 +370,21 @@ end
 
 local Slots = {
     ["ESP_Box"] = function()
+        -- Создаем глобальную функцию очистки, если её ещё нет
+        if not getgenv().ESP_Cache then getgenv().ESP_Cache = {} end
+        getgenv().ClearOldESP = function()
+            for _, item in ipairs(getgenv().ESP_Cache) do
+                pcall(function() item.Visible = false item:Remove() end)
+            end
+            getgenv().ESP_Cache = {}
+        end
+        getgenv().ClearOldESP() -- Очищаем старое перед запуском
+
         local function CreateBox(player)
             if player == game.Players.LocalPlayer then return end
             local Box = Drawing.new("Square")
-            Box.Color = Color3.fromRGB(255, 30, 30) -- Ярко-красный контур
+            table.insert(getgenv().ESP_Cache, Box) -- Запись в кэш для очистки
+            Box.Color = Color3.fromRGB(255, 0, 60) -- Красный неон
             Box.Thickness = 2
             Box.Filled = false
             Box.Visible = false
@@ -394,10 +416,11 @@ local Slots = {
         local function CreateFill(player)
             if player == game.Players.LocalPlayer then return end
             local Fill = Drawing.new("Square")
-            Fill.Color = Color3.fromRGB(120, 0, 0) -- Тёмно-красный / Бордовый для заливки
+            table.insert(getgenv().ESP_Cache, Fill) -- Запись в кэш
+            Fill.Color = Color3.fromRGB(255, 0, 60) -- Красный неон
             Fill.Thickness = 0
             Fill.Filled = true
-            Fill.Transparency = 0.35 -- Легкая прозрачность, чтобы не перекрывать модельку
+            Fill.Transparency = 0.25
             Fill.Visible = false
 
             local connection
@@ -426,13 +449,14 @@ local Slots = {
     ["ESP_HealthBar"] = function()
         local function CreateHealthBar(player)
             if player == game.Players.LocalPlayer then return end
-            local RedBar = Drawing.new("Line")
-            RedBar.Thickness = 2
-            RedBar.Visible = false
+            local GreenBar = Drawing.new("Line")
+            table.insert(getgenv().ESP_Cache, GreenBar) -- Запись в кэш
+            GreenBar.Thickness = 2
+            GreenBar.Visible = false
 
             local connection
             connection = game:GetService("RunService").RenderStepped:Connect(function()
-                if not getgenv().Config["HealthBar"] then RedBar.Visible = false return end
+                if not getgenv().Config["HealthBar"] then GreenBar.Visible = false return end
                 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
                     local rhrp = player.Character.HumanoidRootPart
                     local hum = player.Character.Humanoid
@@ -446,18 +470,18 @@ local Slots = {
                         local boxBottomY = vector.Y + sizeY / 2
                         
                         if getgenv().Config["GradientHP"] then
-                            RedBar.Color = Color3.fromHSV(healthPercent * 0.33, 1, 1) -- Стандартный градиент (красно-желто-зеленый)
+                            GreenBar.Color = Color3.fromHSV(healthPercent * 0.33, 1, 1)
                         else
-                            RedBar.Color = Color3.fromRGB(200, 0, 20) -- Глубокий красный цвет вместо стандартного зелёного
+                            GreenBar.Color = Color3.fromRGB(0, 255, 0)
                         end
                         
-                        RedBar.From = Vector2.new(boxLeftX - 5, boxBottomY)
-                        RedBar.To = Vector2.new(boxLeftX - 5, boxBottomY - barHeight)
-                        RedBar.Visible = true
-                    else RedBar.Visible = false end
+                        GreenBar.From = Vector2.new(boxLeftX - 5, boxBottomY)
+                        GreenBar.To = Vector2.new(boxLeftX - 5, boxBottomY - barHeight)
+                        GreenBar.Visible = true
+                    else GreenBar.Visible = false end
                 else
-                    RedBar.Visible = false
-                    if not game.Players:FindFirstChild(player.Name) then RedBar:Remove() connection:Disconnect() end
+                    GreenBar.Visible = false
+                    if not game.Players:FindFirstChild(player.Name) then GreenBar:Remove() connection:Disconnect() end
                 end
             end)
         end
@@ -471,11 +495,12 @@ local Slots = {
         local function CreateNameESP(player)
             if player == game.Players.LocalPlayer then return end
             local Text = Drawing.new("Text")
-            Text.Color = Color3.fromRGB(255, 120, 120) -- Светло-красный текст для идеальной читаемости
+            table.insert(getgenv().ESP_Cache, Text) -- Запись в кэш
+            Text.Color = Color3.fromRGB(255, 255, 255)
             Text.Size = 16
             Text.Center = true
             Text.Outline = true
-            Text.OutlineColor = Color3.fromRGB(30, 0, 0) -- Очень тёмная красная обводка (почти черная)
+            Text.OutlineColor = Color3.fromRGB(0, 0, 0)
             Text.Visible = false
 
             local connection
@@ -504,7 +529,8 @@ local Slots = {
         local function CreateTracer(player)
             if player == game.Players.LocalPlayer then return end
             local Line = Drawing.new("Line")
-            Line.Color = Color3.fromRGB(150, 0, 0) -- Тёмно-красные линии (не режут глаза)
+            table.insert(getgenv().ESP_Cache, Line) -- Запись в кэш
+            Line.Color = Color3.fromRGB(255, 0, 60) -- Красный неон
             Line.Thickness = 1.5
             Line.Visible = false
 
@@ -529,86 +555,6 @@ local Slots = {
         for _, p in ipairs(game.Players:GetPlayers()) do CreateTracer(p) end
         game.Players.PlayerAdded:Connect(CreateTracer)
     end,
-
-    ["ESP_Skeleton"] = function()
-        local Players = game:GetService("Players")
-        local Camera = workspace.CurrentCamera
-        local RunService = game:GetService("RunService")
-        local LocalPlayer = Players.LocalPlayer
-
-        local BonePairs = {
-            {"Head", "UpperTorso"},
-            {"UpperTorso", "LowerTorso"},
-            {"UpperTorso", "LeftUpperArm"},
-            {"LeftUpperArm", "LeftLowerArm"},
-            {"LeftLowerArm", "LeftHand"},
-            {"UpperTorso", "RightUpperArm"},
-            {"RightUpperArm", "RightLowerArm"},
-            {"RightLowerArm", "RightHand"},
-            {"LowerTorso", "LeftUpperLeg"},
-            {"LeftUpperLeg", "LeftLowerLeg"},
-            {"LeftLowerLeg", "LeftFoot"},
-            {"LowerTorso", "RightUpperLeg"},
-            {"RightUpperLeg", "RightLowerLeg"},
-            {"RightLowerLeg", "RightFoot"}
-        }
-
-        local function CreateSkeleton(player)
-            if player == LocalPlayer then return end
-            
-            local Lines = {}
-            for i = 1, #BonePairs do
-                local line = Drawing.new("Line")
-                line.Color = Color3.fromRGB(255, 255, 255) -- Специально оставлен Белым
-                line.Thickness = 1.5
-                line.Transparency = 1
-                line.Visible = false
-                table.insert(Lines, line)
-            end
-
-            local connection
-            connection = RunService.RenderStepped:Connect(function()
-                if not getgenv().Config["Skeleton"] then
-                    for _, line in ipairs(Lines) do line.Visible = false end
-                    return
-                end
-
-                local char = player.Character
-                if char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
-                    for id, pair in ipairs(BonePairs) do
-                        local partA = char:FindFirstChild(pair[1])
-                        local partB = char:FindFirstChild(pair[2])
-                        local line = Lines[id]
-
-                        if partA and partB then
-                            local posA, onScreenA = Camera:WorldToViewportPoint(partA.Position)
-                            local posB, onScreenB = Camera:WorldToViewportPoint(partB.Position)
-
-                            if onScreenA and onScreenB then
-                                line.From = Vector2.new(posA.X, posA.Y)
-                                line.To = Vector2.new(posB.X, posB.Y)
-                                line.Visible = true
-                            else
-                                line.Visible = false
-                            end
-                        else
-                            line.Visible = false
-                        end
-                    end
-                else
-                    for _, line in ipairs(Lines) do line.Visible = false end
-                    if not Players:FindFirstChild(player.Name) then
-                        for _, line in ipairs(Lines) do line:Remove() end
-                        connection:Disconnect()
-                    end
-                end
-            end)
-        end
-
-        for _, p in ipairs(Players:GetPlayers()) do CreateSkeleton(p) end
-        Players.PlayerAdded:Connect(CreateSkeleton)
-    end,
-
     ["AIM_Aimbot"] = function()
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -1592,27 +1538,27 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/ref
             ]],
             
             ["Красная"] = [[
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/red.lua"))()
+loadstring(game:HttpGet(""https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/Red.lua))()
                 print("Загружена Красная тема!")
             ]],
             
             ["Синяя"] = [[
-                -- СЮДА ВСТАВЛЯЕШЬ ПОЛНУЮ КОПИЮ СВОЕГО СКРИПТА, НО С СИНИМИ ЦВЕТАМИ
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/blue.lua"))()
                 print("Загружена Синяя тема!")
             ]],
             
             ["Зелёная"] = [[
-                -- КОД ЗЕЛЁНОГО СОФТА
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/green.lua"))()
                 print("Загружена Зелёная тема!")
             ]],
             
             ["Жёлтая"] = [[
-                -- КОД ЖЁЛТОГО СОФТА
+              loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/yellow.lua"))()
                 print("Загружена Жёлтая тема!")
             ]],
             
             ["Черная"] = [[
-                -- КОД ЧЁРНОГО СОФТА
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/black.lua"))()
                 print("Загружена Чёрная тема!")
             ]]
         }
