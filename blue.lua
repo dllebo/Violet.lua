@@ -1,7 +1,10 @@
 -- ========================================================================
--- ENGINE V3: DYNAMIC SLOTS SYSTEM WITH SLIDERS & DROPDOWNS (MOBILE) - BLUE
+-- ENGINE V3: DYNAMIC SLOTS SYSTEM WITH SLIDERS & DROPDOWNS (MOBILE)
 -- ========================================================================
 
+if game.CoreGui:FindFirstChild("HvH_Private_Menu") then
+    game.CoreGui["HvH_Private_Menu"]:Destroy()
+end
 -- Очистка старых ESP при переключении тем или перезапуске
 if getgenv().ESP_Cache then
     for _, drawingElement in ipairs(getgenv().ESP_Cache) do
@@ -13,9 +16,6 @@ if getgenv().ESP_Cache then
 end
 getgenv().ESP_Cache = {}
 
-if game.CoreGui:FindFirstChild("HvH_Private_Menu") then
-    game.CoreGui["HvH_Private_Menu"]:Destroy()
-end
 
 getgenv().Config = {}
 local ScreenGui = Instance.new("ScreenGui")
@@ -23,15 +23,42 @@ ScreenGui.Name = "HvH_Private_Menu"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.Size = UDim2.new(0, 80, 0, 35)
+ToggleButton.Position = UDim2.new(0, 10, 0.05, 0) -- Чуть выше середины
+ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = "Закрыть"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamMedium
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", ToggleButton).Color = Color3.fromRGB(50, 50, 50)
+
+-- 2. ТВОЕ МЕНЮ (MAIN FRAME)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-MainFrame.BorderColor3 = Color3.fromRGB(0, 102, 255) -- Синий неон для рамки
-MainFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.Size = UDim2.new(0, 600, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -190)
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.BorderSizePixel = 0
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+
+local ToggleStroke = Instance.new("UIStroke", ToggleButton)
+ToggleStroke.Color = Color3.fromRGB(0, 180, 255) -- Твой фиолетовый неон
+ToggleStroke.Thickness = 2 
+
+-- 3. ЛОГИКА ОТКРЫТИЯ/ЗАКРЫТИЯ
+local isOpen = true
+ToggleButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    MainFrame.Visible = isOpen
+    ToggleButton.Text = isOpen and "Закрыть" or "Открыть"
+end)
 
 local LeftPanel = Instance.new("Frame")
 LeftPanel.Parent = MainFrame
@@ -78,8 +105,8 @@ end)
 local Title = Instance.new("TextLabel")
 Title.Parent = LeftPanel
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "PRIVATE"
-Title.TextColor3 = Color3.fromRGB(0, 102, 255) -- Синий неон для текста названия
+Title.Text = "PRIVATE Recode"
+Title.TextColor3 = Color3.fromRGB(0, 180, 255) -- Фиолетовый неон для текста названия
 Title.Font = Enum.Font.GothamBold
 Title.FontSize = Enum.FontSize.Size18
 Title.BackgroundTransparency = 1
@@ -113,7 +140,7 @@ local function CreateTabButton(tabName)
         for _, btn in ipairs(TabContainer:GetChildren()) do
             if btn:IsA("TextButton") then btn.TextColor3 = Color3.fromRGB(150, 150, 150) end
         end
-        TabButton.TextColor3 = Color3.fromRGB(0, 102, 255) -- Синий неон при клике
+        TabButton.TextColor3 = Color3.fromRGB(0, 180, 255) -- Фиолетовый неон при клике
         
         for _, obj in ipairs(ScrollContent:GetChildren()) do
             if obj:IsA("Frame") then obj.Parent = nil end
@@ -172,7 +199,7 @@ local function BuildCheckbox(tabName, optionName)
         getgenv().Config[optionName] = not getgenv().Config[optionName]
         if getgenv().Config[optionName] then
             Indicator:TweenPosition(UDim2.new(1, -18, 0, 2), "Out", "Quad", 0.15, true)
-            Indicator.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Синий неон при включении
+            Indicator.BackgroundColor3 = Color3.fromRGB(0, 180, 255) -- Фиолетовый неон при включении
         else
             Indicator:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.15, true)
             Indicator.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
@@ -208,7 +235,7 @@ local function BuildSlider(tabName, optionName, min, max, default)
     ValueLabel.Position = UDim2.new(1, -60, 0, 4)
     ValueLabel.Size = UDim2.new(0, 50, 0, 18)
     ValueLabel.Text = tostring(default)
-    ValueLabel.TextColor3 = Color3.fromRGB(0, 102, 255) -- Синий текст значения
+    ValueLabel.TextColor3 = Color3.fromRGB(0, 180, 255) -- Фиолетовый текст значения
     ValueLabel.Font = Enum.Font.GothamBold
     ValueLabel.FontSize = Enum.FontSize.Size14
     ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -227,7 +254,7 @@ local function BuildSlider(tabName, optionName, min, max, default)
 
     local SliderFill = Instance.new("Frame")
     SliderFill.Parent = SliderBg
-    SliderFill.BackgroundColor3 = Color3.fromRGB(0, 102, 255) -- Синяя шкала слайдера
+    SliderFill.BackgroundColor3 = Color3.fromRGB(0, 180, 255) -- Синяя шкала слайдера
     local percent = (default - min) / (max - min)
     SliderFill.Size = UDim2.new(percent, 0, 1, 0)
     SliderFill.BorderSizePixel = 0
@@ -291,7 +318,7 @@ local function BuildDropdown(tabName, optionName, items)
     DropdownBtn.Size = UDim2.new(0, 120, 0, 25)
     DropdownBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
     DropdownBtn.Text = items[1] .. " ▼"
-    DropdownBtn.TextColor3 = Color3.fromRGB(0, 102, 255) -- Синий текст кнопки дропдауна
+    DropdownBtn.TextColor3 = Color3.fromRGB(0, 180, 255) -- Фиолетовый текст кнопки дропдауна
     DropdownBtn.Font = Enum.Font.GothamBold
     DropdownBtn.FontSize = Enum.FontSize.Size12
     local DropCorner = Instance.new("UICorner")
@@ -301,7 +328,7 @@ local function BuildDropdown(tabName, optionName, items)
     local DropListFrame = Instance.new("Frame")
     DropListFrame.Size = UDim2.new(0, 120, 0, #items * 25)
     DropListFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
-    DropListFrame.BorderColor3 = Color3.fromRGB(0, 102, 255) -- Синяя рамка списка элементов
+    DropListFrame.BorderColor3 = Color3.fromRGB(0, 180, 255) -- Синяя рамка списка элементов
     DropListFrame.Visible = false
     DropListFrame.ZIndex = 10
 
@@ -342,9 +369,7 @@ local function BuildDropdown(tabName, optionName, items)
 end
 
 local Slots = {
-
-local Slots = {
-    ["ESP_Box"] = function()
+     ["ESP_Box"] = function()
         -- Создаем глобальную функцию очистки, если её ещё нет
         if not getgenv().ESP_Cache then getgenv().ESP_Cache = {} end
         getgenv().ClearOldESP = function()
@@ -359,7 +384,7 @@ local Slots = {
             if player == game.Players.LocalPlayer then return end
             local Box = Drawing.new("Square")
             table.insert(getgenv().ESP_Cache, Box) -- Запись в кэш для очистки
-            Box.Color = Color3.fromRGB(0, 102, 255) -- Неоново-синий
+            Box.Color = Color3.fromRGB(0, 180, 255) -- Неоново-фиолетовый
             Box.Thickness = 2
             Box.Filled = false
             Box.Visible = false
@@ -392,7 +417,7 @@ local Slots = {
             if player == game.Players.LocalPlayer then return end
             local Fill = Drawing.new("Square")
             table.insert(getgenv().ESP_Cache, Fill) -- Запись в кэш
-            Fill.Color = Color3.fromRGB(0, 102, 255) -- Неоново-синий
+            Fill.Color = Color3.fromRGB(0, 180, 255) -- Неоново-фиолетовый
             Fill.Thickness = 0
             Fill.Filled = true
             Fill.Transparency = 0.25
@@ -505,7 +530,7 @@ local Slots = {
             if player == game.Players.LocalPlayer then return end
             local Line = Drawing.new("Line")
             table.insert(getgenv().ESP_Cache, Line) -- Запись в кэш
-            Line.Color = Color3.fromRGB(0, 102, 255) -- Неоново-синий
+            Line.Color = Color3.fromRGB(0, 180, 255) -- Неоново-фиолетовый
             Line.Thickness = 1.5
             Line.Visible = false
 
@@ -1480,7 +1505,7 @@ end,
                             
                             -- Визуальный эффект: красим его чамс в фиолетовый, показывая что он "наш"
                             if sender.Character and sender.Character:FindFirstChild("My_FF_XRay") then
-                                sender.Character.My_FF_XRay.FillColor = Color3.fromRGB(180, 0, 255)
+                                sender.Character.My_FF_XRay.FillColor = Color3.fromRGB(0, 180, 255)
                             end
                         end
                     end
@@ -1506,9 +1531,9 @@ end,
         
         -- Сюда мы закладываем код каждого софта прямо в RAW формате (внутри огромных строк)
         local RawScripts = {
-            ["Фиолетовая"] = [[
+            ["Синяя"] = [[
 loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/violete.lua"))()
-                print("Загружена Фиолетовая тема!")
+                print("Загружена Синяя тема!")
                 -- Пример: loadstring(game:HttpGet("ссылка"))() если всё же захочешь отсюда вызвать гитхаб,
                 -- но лучше вставить сюда весь код целиком от первой до последней строчки.
             ]],
@@ -1547,7 +1572,7 @@ loadstring(game:HttpGet(""https://raw.githubusercontent.com/dllebo/Violet.lua/re
                     getgenv().Config["LoadTheme"] = false
                     
                     -- Получаем выбранный цвет
-                    local selectedColor = getgenv().Config["ThemeSelect"] or "Фиолетовая"
+                    local selectedColor = getgenv().Config["ThemeSelect"] or "Синяя"
                     local rawCode = RawScripts[selectedColor]
 
                     if rawCode and rawCode ~= "" then
@@ -1600,7 +1625,7 @@ for slotName, slotCode in pairs(Slots) do
         elseif func == "Distance" then
             BuildSlider(tab, func, 5, 100, 25)
         elseif func == "ThemeSelect" then
-            BuildDropdown(tab, func, {"Фиолетовая", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
+            BuildDropdown(tab, func, {"Синяя", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
         elseif func == "VisualJitterSpin" then
             BuildCheckbox(tab, func)
         elseif func == "NoclipFly" then
