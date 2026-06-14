@@ -23,15 +23,42 @@ ScreenGui.Name = "HvH_Private_Menu"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = ScreenGui
+ToggleButton.Size = UDim2.new(0, 80, 0, 35)
+ToggleButton.Position = UDim2.new(0, 10, 0.05, 0) -- Чуть выше середины
+ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = "Закрыть"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamMedium
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", ToggleButton).Color = Color3.fromRGB(50, 50, 50)
+
+-- 2. ТВОЕ МЕНЮ (MAIN FRAME)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-MainFrame.BorderColor3 = Color3.fromRGB(110, 0, 190) -- ТЁМНО-ФИОЛЕТОВАЯ ОБВОДКА МЕНЮ
-MainFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.Size = UDim2.new(0, 600, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -190)
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.BorderSizePixel = 0
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+
+local ToggleStroke = Instance.new("UIStroke", ToggleButton)
+ToggleStroke.Color = Color3.fromRGB(165, 30, 255) -- Твой фиолетовый неон
+ToggleStroke.Thickness = 2 
+
+-- 3. ЛОГИКА ОТКРЫТИЯ/ЗАКРЫТИЯ
+local isOpen = true
+ToggleButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    MainFrame.Visible = isOpen
+    ToggleButton.Text = isOpen and "Закрыть" or "Открыть"
+end)
 
 local LeftPanel = Instance.new("Frame")
 LeftPanel.Parent = MainFrame
@@ -41,319 +68,79 @@ LeftPanel.BorderSizePixel = 0
 
 local TabContainer = Instance.new("Frame")
 TabContainer.Parent = LeftPanel
-TabContainer.Size = UDim2.new(1, 0, 1, 0)
-TabContainer.BackgroundTransparency = 1
+TabContainer.Size = UDim2.new(1, 0, 1, -40)
+TabContainer.Position = UDim2.new(0, 0, 0, 40)
+TabContainer.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+TabContainer.BorderSizePixel = 0
 
-local TabLayout = Instance.new("UIListLayout")
-TabLayout.Parent = TabContainer
-TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabLayout.Padding = UDim.new(0, 4)
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = TabContainer
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 4)
+
+local ContentPanel = Instance.new("Frame")
+ContentPanel.Parent = MainFrame
+ContentPanel.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
+ContentPanel.Position = UDim2.new(0, 145, 0, 10)
+ContentPanel.Size = UDim2.new(1, -155, 1, -20)
+ContentPanel.BorderSizePixel = 0
 
 local ScrollContent = Instance.new("ScrollingFrame")
-ScrollContent.Parent = MainFrame
-ScrollContent.Position = UDim2.new(0, 150, 0, 10)
-ScrollContent.Size = UDim2.new(0, 440, 0, 360)
+ScrollContent.Parent = ContentPanel
+ScrollContent.Size = UDim2.new(1, 0, 1, 0)
 ScrollContent.BackgroundTransparency = 1
 ScrollContent.BorderSizePixel = 0
-ScrollContent.CanvasSize = UDim2.new(0, 0, 0, 950)
+ScrollContent.ScrollBarThickness = 4
+ScrollContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 local ContentLayout = Instance.new("UIListLayout")
 ContentLayout.Parent = ScrollContent
 ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ContentLayout.Padding = UDim.new(0, 8)
+ContentLayout.Padding = UDim.new(0, 6)
 
--- Кнопка Скрыть/Показать
-local ToggleMenuBtn = Instance.new("TextButton")
-ToggleMenuBtn.Parent = ScreenGui
-ToggleMenuBtn.Position = UDim2.new(0.02, 0, 0.05, 0)
-ToggleMenuBtn.Size = UDim2.new(0, 80, 0, 35)
-ToggleMenuBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-ToggleMenuBtn.BorderColor3 = Color3.fromRGB(110, 0, 190) -- ТЁМНО-ФИОЛЕТОВАЯ ОБВОДКА КНОПКИ
-ToggleMenuBtn.Text = "HvH Menu"
-ToggleMenuBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleMenuBtn.Font = Enum.Font.SourceSansBold
-ToggleMenuBtn.TextSize = 14
-local BtnCorner = Instance.new("UICorner", ToggleMenuBtn)
-BtnCorner.CornerRadius = UDim.new(0, 6)
-
-ToggleMenuBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
+ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ScrollContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 10)
 end)
 
-local RegisteredElements = {}
+local Title = Instance.new("TextLabel")
+Title.Parent = LeftPanel
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "PRIVATE Recode"
+Title.TextColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовый неон для текста названия
+Title.Font = Enum.Font.GothamBold
+Title.FontSize = Enum.FontSize.Size18
+Title.BackgroundTransparency = 1
+
 local CreatedTabs = {}
-
-local function BuildCheckbox(tabName, funcName)
-    getgenv().Config[funcName] = false
-    
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -15, 0, 45)
-    Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 27)
-    Frame.BorderSizePixel = 0
-    Frame.Visible = false
-    local FrameCorner = Instance.new("UICorner", Frame)
-    FrameCorner.CornerRadius = UDim.new(0, 6)
-    
-    local Box = Instance.new("TextButton")
-    Box.Size = UDim2.new(0, 26, 0, 26)
-    Box.Position = UDim2.new(0, 12, 0, 9)
-    Box.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    Box.BorderSizePixel = 0
-    Box.Text = ""
-    Box.Parent = Frame
-    local BoxCorner = Instance.new("UICorner", Box)
-    BoxCorner.CornerRadius = UDim.new(0, 4)
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -60, 1, 0)
-    Label.Position = UDim2.new(0, 50, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = funcName
-    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Font = Enum.Font.SourceSans
-    Label.TextSize = 18
-    Label.Parent = Frame
-    
-    if tabName == "AA" then
-        local TagLabel = Instance.new("TextLabel")
-        TagLabel.Size = UDim2.new(0.3, 0, 1, 0)
-        TagLabel.Position = UDim2.new(0.65, 0, 0, 0)
-        TagLabel.BackgroundTransparency = 1
-        TagLabel.Font = Enum.Font.SourceSansBold
-        TagLabel.TextSize = 14
-        TagLabel.TextXAlignment = Enum.TextXAlignment.Right
-        TagLabel.Parent = Frame
-        
-        if string.find(funcName, "Visual") then
-            TagLabel.Text = "[визуал]"
-            TagLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-        else
-            TagLabel.Text = "[не визуал]"
-            TagLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-        end
-    end
-    
-    Box.MouseButton1Click:Connect(function()
-        getgenv().Config[funcName] = not getgenv().Config[funcName]
-        if getgenv().Config[funcName] then
-            Box.BackgroundColor3 = Color3.fromRGB(165, 30, 255) -- ЯРКО-ФИОЛЕТОВЫЙ ЧЕКБОКС
-            local Mark = Instance.new("Frame")
-            Mark.Name = "Mark"
-            Mark.Size = UDim2.new(0, 12, 0, 12)
-            Mark.Position = UDim2.new(0, 7, 0, 7)
-            Mark.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Mark.Parent = Box
-            local MarkCorner = Instance.new("UICorner", Mark)
-            MarkCorner.CornerRadius = UDim.new(0, 3)
-        else
-            Box.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-            if Box:FindFirstChild("Mark") then Box.Mark:Destroy() end
-        end
-    end)
-    
-    if not RegisteredElements[tabName] then RegisteredElements[tabName] = {} end
-    table.insert(RegisteredElements[tabName], Frame)
-end
-
-local function BuildSlider(tabName, funcName, min, max, default)
-    getgenv().Config[funcName] = default
-    
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -15, 0, 50)
-    Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 27)
-    Frame.BorderSizePixel = 0
-    Frame.Visible = false
-    local FrameCorner = Instance.new("UICorner", Frame)
-    FrameCorner.CornerRadius = UDim.new(0, 6)
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.6, 0, 0, 25)
-    Label.Position = UDim2.new(0, 12, 0, 2)
-    Label.BackgroundTransparency = 1
-    Label.Text = funcName
-    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Font = Enum.Font.SourceSans
-    Label.TextSize = 16
-    Label.Parent = Frame
-    
-    local ValueLabel = Instance.new("TextLabel")
-    ValueLabel.Size = UDim2.new(0.2, 0, 0, 25)
-    ValueLabel.Position = UDim2.new(0.5, 0, 0, 2)
-    ValueLabel.BackgroundTransparency = 1
-    ValueLabel.Text = tostring(default)
-    ValueLabel.TextColor3 = Color3.fromRGB(165, 30, 255) -- ЦВЕТ ЦИФР ПОЛЗУНКА
-    ValueLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ValueLabel.Font = Enum.Font.SourceSansBold
-    ValueLabel.TextSize = 16
-    ValueLabel.Parent = Frame
-
-    if tabName == "AA" then
-        local TagLabel = Instance.new("TextLabel")
-        TagLabel.Size = UDim2.new(0.3, 0, 0, 25)
-        TagLabel.Position = UDim2.new(0.65, 0, 0, 2)
-        TagLabel.BackgroundTransparency = 1
-        TagLabel.Font = Enum.Font.SourceSansBold
-        TagLabel.TextSize = 14
-        TagLabel.TextXAlignment = Enum.TextXAlignment.Right
-        TagLabel.Parent = Frame
-        
-        if string.find(funcName, "Visual") then
-            TagLabel.Text = "[визуал]"
-            TagLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-        else
-            TagLabel.Text = "[не визуал]"
-            TagLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-        end
-    end
-
-    local SliderTrack = Instance.new("TextButton")
-    SliderTrack.Size = UDim2.new(1, -24, 0, 6)
-    SliderTrack.Position = UDim2.new(0, 12, 0, 32)
-    SliderTrack.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    SliderTrack.Text = ""
-    SliderTrack.BorderSizePixel = 0
-    SliderTrack.Parent = Frame
-    local TrackCorner = Instance.new("UICorner", SliderTrack)
-    TrackCorner.CornerRadius = UDim.new(0, 3)
-    
-    local SliderFill = Instance.new("Frame")
-    local percent = (default - min) / (max - min)
-    SliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    SliderFill.BackgroundColor3 = Color3.fromRGB(165, 30, 255) -- ФИОЛЕТОВАЯ ЗАЛИВКА ПОЛЗУНКА
-    SliderFill.BorderSizePixel = 0
-    SliderFill.Parent = SliderTrack
-    local FillCorner = Instance.new("UICorner", SliderFill)
-    FillCorner.CornerRadius = UDim.new(0, 3)
-    
-    local function UpdateSlider(input)
-        local x = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
-        local value = math.floor(min + (max - min) * x)
-        SliderFill.Size = UDim2.new(x, 0, 1, 0)
-        ValueLabel.Text = tostring(value)
-        getgenv().Config[funcName] = value
-    end
-    
-    local dragging = false
-    SliderTrack.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            UpdateSlider(input)
-        end
-    end)
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateSlider(input)
-        end
-    end)
-    game:GetService("UserInputService").InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    if not RegisteredElements[tabName] then RegisteredElements[tabName] = {} end
-    table.insert(RegisteredElements[tabName], Frame)
-end
-
-local function BuildDropdown(tabName, funcName, listOptions)
-    getgenv().Config[funcName] = listOptions[1]
-    
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -15, 0, 45)
-    Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 27)
-    Frame.BorderSizePixel = 0
-    Frame.Visible = false
-    local FrameCorner = Instance.new("UICorner", Frame)
-    FrameCorner.CornerRadius = UDim.new(0, 6)
-    Frame.ClipsDescendants = false
-    
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.5, 0, 1, 0)
-    Label.Position = UDim2.new(0, 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = funcName
-    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Font = Enum.Font.SourceSans
-    Label.TextSize = 18
-    Label.Parent = Frame
-    
-    local TriggerBtn = Instance.new("TextButton")
-    TriggerBtn.Size = UDim2.new(0.4, 0, 0, 30)
-    TriggerBtn.Position = UDim2.new(0.55, 0, 0, 7)
-    TriggerBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    TriggerBtn.Text = listOptions[1]
-    TriggerBtn.TextColor3 = Color3.fromRGB(165, 30, 255) -- ЦВЕТ ТЕКСТА В ДРОПДАУНЕ
-    TriggerBtn.Font = Enum.Font.SourceSansBold
-    TriggerBtn.TextSize = 14
-    TriggerBtn.Parent = Frame
-    local TriggerCorner = Instance.new("UICorner", TriggerBtn)
-    TriggerCorner.CornerRadius = UDim.new(0, 4)
-    
-    local ListContainer = Instance.new("Frame")
-    ListContainer.Size = UDim2.new(1, 0, 0, #listOptions * 32)
-    ListContainer.Position = UDim2.new(0, 0, 1, 4)
-    ListContainer.BackgroundColor3 = Color3.fromRGB(28, 28, 33)
-    ListContainer.BorderSizePixel = 1
-    ListContainer.BorderColor3 = Color3.fromRGB(110, 0, 190) -- ТЁМНО-ФИОЛЕТОВАЯ ОБВОДКА СПИСКА
-    ListContainer.Visible = false
-    ListContainer.ZIndex = 5
-    ListContainer.Parent = TriggerBtn
-    local ListCorner = Instance.new("UICorner", ListContainer)
-    ListCorner.CornerRadius = UDim.new(0, 4)
-    
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Parent = ListContainer
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    for i, option in ipairs(listOptions) do
-        local OptBtn = Instance.new("TextButton")
-        OptBtn.Size = UDim2.new(1, 0, 0, 32)
-        OptBtn.BackgroundTransparency = 1
-        OptBtn.Text = option
-        OptBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        OptBtn.Font = Enum.Font.SourceSans
-        OptBtn.TextSize = 16
-        OptBtn.ZIndex = 6
-        OptBtn.Parent = ListContainer
-        
-        OptBtn.MouseButton1Click:Connect(function()
-            getgenv().Config[funcName] = option
-            TriggerBtn.Text = option
-            ListContainer.Visible = false
-        end)
-    end
-    
-    TriggerBtn.MouseButton1Click:Connect(function()
-        ListContainer.Visible = not ListContainer.Visible
-    end)
-    
-    if not RegisteredElements[tabName] then RegisteredElements[tabName] = {} end
-    table.insert(RegisteredElements[tabName], Frame)
-end
+local RegisteredElements = {}
 
 local function CreateTabButton(tabName)
     if CreatedTabs[tabName] then return end
     CreatedTabs[tabName] = true
-    
+    RegisteredElements[tabName] = {}
+
     local TabButton = Instance.new("TextButton")
     TabButton.Name = "Tab_" .. tabName
-    TabButton.Size = UDim2.new(1, 0, 0, 45)
-    TabButton.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-    TabButton.BorderSizePixel = 0
-    TabButton.Text = tabName
-    TabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-    TabButton.Font = Enum.Font.SourceSansBold
-    TabButton.TextSize = 18
     TabButton.Parent = TabContainer
-    
+    TabButton.Size = UDim2.new(1, -10, 0, 32)
+    TabButton.Position = UDim2.new(0, 5, 0, 0)
+    TabButton.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    TabButton.Text = "  " .. tabName
+    TabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+    TabButton.Font = Enum.Font.GothamSemibold
+    TabButton.FontSize = Enum.FontSize.Size14
+    TabButton.TextXAlignment = Enum.TextXAlignment.Left
+    TabButton.BorderSizePixel = 0
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 4)
+    UICorner.Parent = TabButton
+
     TabButton.MouseButton1Click:Connect(function()
         for _, btn in ipairs(TabContainer:GetChildren()) do
             if btn:IsA("TextButton") then btn.TextColor3 = Color3.fromRGB(150, 150, 150) end
         end
-        TabButton.TextColor3 = Color3.fromRGB(165, 30, 255) -- ЦВЕТ АКТИВНОЙ ВКЛАДКИ
+        TabButton.TextColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовый неон при клике
         
         for _, obj in ipairs(ScrollContent:GetChildren()) do
             if obj:IsA("Frame") then obj.Parent = nil end
@@ -368,8 +155,221 @@ local function CreateTabButton(tabName)
     end)
 end
 
+local function BuildCheckbox(tabName, optionName)
+    getgenv().Config[optionName] = false
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, -10, 0, 35)
+    Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    Frame.BorderSizePixel = 0
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 4)
+    UICorner.Parent = Frame
+
+    local Label = Instance.new("TextLabel")
+    Label.Parent = Frame
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(0.7, 0, 1, 0)
+    Label.Text = optionName
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Font = Enum.Font.Gotham
+    Label.FontSize = Enum.FontSize.Size14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+
+    local Button = Instance.new("TextButton")
+    Button.Parent = Frame
+    Button.Position = UDim2.new(1, -50, 0, 7)
+    Button.Size = UDim2.new(0, 40, 0, 20)
+    Button.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    Button.Text = ""
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 10)
+    BtnCorner.Parent = Button
+
+    local Indicator = Instance.new("Frame")
+    Indicator.Parent = Button
+    Indicator.Position = UDim2.new(0, 2, 0, 2)
+    Indicator.Size = UDim2.new(0, 16, 0, 16)
+    Indicator.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+    local IndCorner = Instance.new("UICorner")
+    IndCorner.CornerRadius = UDim.new(0, 8)
+    IndCorner.Parent = Indicator
+
+    Button.MouseButton1Click:Connect(function()
+        getgenv().Config[optionName] = not getgenv().Config[optionName]
+        if getgenv().Config[optionName] then
+            Indicator:TweenPosition(UDim2.new(1, -18, 0, 2), "Out", "Quad", 0.15, true)
+            Indicator.BackgroundColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовый неон при включении
+        else
+            Indicator:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.15, true)
+            Indicator.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+        end
+    end)
+
+    table.insert(RegisteredElements[tabName], Frame)
+end
+
+local function BuildSlider(tabName, optionName, min, max, default)
+    getgenv().Config[optionName] = default
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, -10, 0, 45)
+    Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    Frame.BorderSizePixel = 0
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 4)
+    UICorner.Parent = Frame
+
+    local Label = Instance.new("TextLabel")
+    Label.Parent = Frame
+    Label.Position = UDim2.new(0, 10, 0, 4)
+    Label.Size = UDim2.new(0.6, 0, 0, 18)
+    Label.Text = optionName
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Font = Enum.Font.Gotham
+    Label.FontSize = Enum.FontSize.Size14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Parent = Frame
+    ValueLabel.Position = UDim2.new(1, -60, 0, 4)
+    ValueLabel.Size = UDim2.new(0, 50, 0, 18)
+    ValueLabel.Text = tostring(default)
+    ValueLabel.TextColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовый текст значения
+    ValueLabel.Font = Enum.Font.GothamBold
+    ValueLabel.FontSize = Enum.FontSize.Size14
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValueLabel.BackgroundTransparency = 1
+
+    local SliderBg = Instance.new("TextButton")
+    SliderBg.Parent = Frame
+    SliderBg.Position = UDim2.new(0, 10, 0, 26)
+    SliderBg.Size = UDim2.new(1, -20, 0, 6)
+    SliderBg.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    SliderBg.Text = ""
+    SliderBg.AutoButtonColor = false
+    local SliderBgCorner = Instance.new("UICorner")
+    SliderBgCorner.CornerRadius = UDim.new(0, 3)
+    SliderBgCorner.Parent = SliderBg
+
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Parent = SliderBg
+    SliderFill.BackgroundColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовая шкала слайдера
+    local percent = (default - min) / (max - min)
+    SliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    SliderFill.BorderSizePixel = 0
+    local SliderFillCorner = Instance.new("UICorner")
+    SliderFillCorner.CornerRadius = UDim.new(0, 3)
+    SliderFillCorner.Parent = SliderFill
+
+    local function update(input)
+        local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+        local val = math.floor(min + (max - min) * pos)
+        getgenv().Config[optionName] = val
+        ValueLabel.Text = tostring(val)
+    end
+
+    local sliding = false
+    SliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            sliding = true
+            update(input)
+        end
+    end)
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if sliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
+    end)
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            sliding = false
+        end
+    end)
+
+    table.insert(RegisteredElements[tabName], Frame)
+end
+
+local function BuildDropdown(tabName, optionName, items)
+    getgenv().Config[optionName] = items[1]
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, -10, 0, 35)
+    Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    Frame.BorderSizePixel = 0
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 4)
+    UICorner.Parent = Frame
+
+    local Label = Instance.new("TextLabel")
+    Label.Parent = Frame
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.Size = UDim2.new(0.5, 0, 1, 0)
+    Label.Text = optionName
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.Font = Enum.Font.Gotham
+    Label.FontSize = Enum.FontSize.Size14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.BackgroundTransparency = 1
+
+    local DropdownBtn = Instance.new("TextButton")
+    DropdownBtn.Parent = Frame
+    DropdownBtn.Position = UDim2.new(1, -130, 0, 5)
+    DropdownBtn.Size = UDim2.new(0, 120, 0, 25)
+    DropdownBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
+    DropdownBtn.Text = items[1] .. " ▼"
+    DropdownBtn.TextColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовый текст кнопки дропдауна
+    DropdownBtn.Font = Enum.Font.GothamBold
+    DropdownBtn.FontSize = Enum.FontSize.Size12
+    local DropCorner = Instance.new("UICorner")
+    DropCorner.CornerRadius = UDim.new(0, 4)
+    DropCorner.Parent = DropdownBtn
+
+    local DropListFrame = Instance.new("Frame")
+    DropListFrame.Size = UDim2.new(0, 120, 0, #items * 25)
+    DropListFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+    DropListFrame.BorderColor3 = Color3.fromRGB(165, 30, 255) -- Фиолетовая рамка списка элементов
+    DropListFrame.Visible = false
+    DropListFrame.ZIndex = 10
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.Parent = DropListFrame
+
+    for _, itemName in ipairs(items) do
+        local ItemBtn = Instance.new("TextButton")
+        ItemBtn.Size = UDim2.new(1, 0, 0, 25)
+        ItemBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+        ItemBtn.Text = itemName
+        ItemBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        ItemBtn.Font = Enum.Font.Gotham
+        ItemBtn.FontSize = Enum.FontSize.Size12
+        ItemBtn.ZIndex = 10
+        ItemBtn.Parent = DropListFrame
+
+        ItemBtn.MouseButton1Click:Connect(function()
+            getgenv().Config[optionName] = itemName
+            DropdownBtn.Text = itemName .. " ▼"
+            DropListFrame.Visible = false
+            DropListFrame.Parent = nil
+        end)
+    end
+
+    DropdownBtn.MouseButton1Click:Connect(function()
+        if DropListFrame.Visible then
+            DropListFrame.Visible = false
+            DropListFrame.Parent = nil
+        else
+            DropListFrame.Parent = ScreenGui
+            DropListFrame.Position = UDim2.new(0, DropdownBtn.AbsolutePosition.X, 0, DropdownBtn.AbsolutePosition.Y + 28)
+            DropListFrame.Visible = true
+        end
+    end)
+
+    table.insert(RegisteredElements[tabName], Frame)
+end
+
 local Slots = {
-    ["ESP_Box"] = function()
+     ["ESP_Box"] = function()
         -- Создаем глобальную функцию очистки, если её ещё нет
         if not getgenv().ESP_Cache then getgenv().ESP_Cache = {} end
         getgenv().ClearOldESP = function()
@@ -378,13 +378,13 @@ local Slots = {
             end
             getgenv().ESP_Cache = {}
         end
-        getgenv().ClearOldESP() -- Очищаем старое перед запуском
+        getgenv().ClearOldESP() -- Очищаем всё старое перед запуском синих ESP
 
         local function CreateBox(player)
             if player == game.Players.LocalPlayer then return end
             local Box = Drawing.new("Square")
             table.insert(getgenv().ESP_Cache, Box) -- Запись в кэш для очистки
-            Box.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
+            Box.Color = Color3.fromRGB(165, 30, 255) -- Неоново-фиолетовый
             Box.Thickness = 2
             Box.Filled = false
             Box.Visible = false
@@ -417,7 +417,7 @@ local Slots = {
             if player == game.Players.LocalPlayer then return end
             local Fill = Drawing.new("Square")
             table.insert(getgenv().ESP_Cache, Fill) -- Запись в кэш
-            Fill.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
+            Fill.Color = Color3.fromRGB(165, 30, 255) -- Неоново-фиолетовый
             Fill.Thickness = 0
             Fill.Filled = true
             Fill.Transparency = 0.25
@@ -530,7 +530,7 @@ local Slots = {
             if player == game.Players.LocalPlayer then return end
             local Line = Drawing.new("Line")
             table.insert(getgenv().ESP_Cache, Line) -- Запись в кэш
-            Line.Color = Color3.fromRGB(165, 30, 255) -- Фиолетовый
+            Line.Color = Color3.fromRGB(165, 30, 255) -- Неоново-фиолетовый
             Line.Thickness = 1.5
             Line.Visible = false
 
@@ -563,7 +563,7 @@ local Slots = {
         local RunService = game:GetService("RunService")
         
         local FOVCircle = Drawing.new("Circle")
-        FOVCircle.Color = Color3.fromRGB(0, 180, 255)
+        FOVCircle.Color = Color3.fromRGB(165, 30, 255)
         FOVCircle.Thickness = 1.5
         FOVCircle.Filled = false
         FOVCircle.Transparency = 0.7
@@ -621,11 +621,10 @@ local Slots = {
         end)
     end,
 
-    ["AIM_Hitbox"] = function() end,
-    ["AIM_AimRadius"] = function() end,
-    ["AIM_Visible"] = function() end,
+    ["AIM_Hitbox"]     = function() end,
+    ["AIM_AimRadius"]        = function() end,
+    ["AIM_Visible"]    = function() end,
     ["AIM_Smoothness"] = function() end,
-    
     ["MOVEMENT_BunnyHop"] = function()
         local RunService = game:GetService("RunService")
         local LocalPlayer = game.Players.LocalPlayer
@@ -686,12 +685,14 @@ local Slots = {
         local Players = game:GetService("Players")
         local lp = Players.LocalPlayer
 
+        -- Кэш для сохранения оригинального вида персонажа
         local originalMaterials = {}
         local originalColors = {}
         local originalTextures = {}
 
-        local ForceFieldColor = Color3.fromRGB(255, 255, 255)
+        local ForceFieldColor = Color3.fromRGB(255, 255, 255) -- Белый акцент
 
+        -- Функция для сохранения оригинального состояния деталей
         local function backupPart(part)
             if not originalMaterials[part] then
                 originalMaterials[part] = part.Material
@@ -708,21 +709,25 @@ local Slots = {
             local char = lp.Character
             if not char then return end
 
+            -- ЕСЛИ ЧИТ ВКЛЮЧЕН В МЕНЮ
             if getgenv().Config["SelfChams"] then
+                
+                -- Функция применения ForceField
                 local function applyFF(part)
                     if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        backupPart(part)
+                        backupPart(part) -- Сохраняем оригинал перед изменением
                         
                         part.Material = Enum.Material.ForceField
                         part.Color = ForceFieldColor
                         
                         local mesh = part:FindFirstChildOfClass("SpecialMesh")
                         if mesh then
-                            mesh.TextureId = ""
+                            mesh.TextureId = "" -- Очищаем текстуру одежды/волос
                         end
                     end
                 end
 
+                -- Обрабатываем тело и аксессуары
                 for _, child in ipairs(char:GetChildren()) do
                     applyFF(child)
                     if child:IsA("Accessory") then
@@ -731,12 +736,14 @@ local Slots = {
                     end
                 end
 
+                -- Скрываем 2D декали (лицо, принты на футболках), чтобы не баговали
                 for _, decal in ipairs(char:GetDescendants()) do
                     if decal:IsA("Decal") or decal:IsA("Texture") then
                         decal.Transparency = 1
                     end
                 end
 
+                -- Создаем сквозной рентген-эффект (Highlight)
                 if not char:FindFirstChild("My_FF_XRay") then
                     local hl = Instance.new("Highlight")
                     hl.Name = "My_FF_XRay"
@@ -747,6 +754,8 @@ local Slots = {
                     hl.Adornee = char
                     hl.Parent = char
                 end
+
+            -- ЕСЛИ ЧИТ ВЫКЛЮЧЕН В МЕНЮ (Возвращаем все как было)
             else
                 if char:FindFirstChild("My_FF_XRay") then 
                     char.My_FF_XRay:Destroy() 
@@ -759,23 +768,26 @@ local Slots = {
                         
                         local mesh = part:FindFirstChildOfClass("SpecialMesh")
                         if mesh and originalTextures[part] then
-                            mesh.TextureId = originalTextures[part]
+                            mesh.TextureId = originalTextures[part] -- Возвращаем волосы/одежду
                         end
                     end
                 end
                 
+                -- Возвращаем видимость лицу и деталям
                 for _, decal in ipairs(char:GetDescendants()) do
                     if (decal:IsA("Decal") or decal:IsA("Texture")) and decal.Name ~= "HumanoidRootPart" then
                         decal.Transparency = 0
                     end
                 end
                 
+                -- Очищаем таблицы кэша, если выключили функцию
                 table.clear(originalMaterials)
                 table.clear(originalColors)
                 table.clear(originalTextures)
             end
         end)
 
+        -- Сброс кэша при респавне, чтобы не было багов с новыми шмотками
         lp.CharacterAdded:Connect(function()
             table.clear(originalMaterials)
             table.clear(originalColors)
@@ -803,37 +815,41 @@ local Slots = {
     end,
 
     ["VISUALS_Distance"] = function() end,
-    
     ["VISUALS_KillStreak"] = function()
         local Players = game:GetService("Players")
         local RunService = game:GetService("RunService")
         local TweenService = game:GetService("TweenService")
         local lp = Players.LocalPlayer
 
+        -- Переменные логики киллстрика
         local currentStreak = 0
         local lastKillTime = 0
-        local comboDuration = 3 
+        local comboDuration = 3 -- Время комбо (3 секунды)
         
+        -- Таблица для хранения истории прицеливания (буфер на 0.4 секунды)
         local aimHistory = {}
-        local historyWindow = 0.4 
+        local historyWindow = 0.4 -- Окно задержки из-за интернета
 
+        -- Создаем графический интерфейс для счетчика (Локально)
         local StreakGui = Instance.new("ScreenGui")
         StreakGui.Name = "KillStreak_Display"
         StreakGui.Parent = game.CoreGui
         StreakGui.ResetOnSpawn = false
 
+        -- Главный контейнер (СМЕЩЕН В САМЫЙ НИЗ ЭКРАНА - 85% высоты)
         local MainBox = Instance.new("Frame")
         MainBox.Size = UDim2.new(0, 200, 0, 26)
         MainBox.Position = UDim2.new(0.5, -100, 0, workspace.CurrentCamera.ViewportSize.Y * 0.67)
         MainBox.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-        MainBox.BackgroundTransparency = 1 
+        MainBox.BackgroundTransparency = 1 -- По умолчанию скрыто
         MainBox.BorderSizePixel = 0
         MainBox.Parent = StreakGui
         local BoxCorner = Instance.new("UICorner", MainBox)
         BoxCorner.CornerRadius = UDim.new(0, 4)
 
+        -- Фон полоски времени
         local BarBackground = Instance.new("Frame")
-        BarBackground.Size = UDim2.new(0, 140, 0, 3) 
+        BarBackground.Size = UDim2.new(0, 140, 0, 3) -- СДЕЛАНА ПОТОНЬШЕ (3 пикселя)
         BarBackground.Position = UDim2.new(0, 10, 0, 18)
         BarBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
         BarBackground.BackgroundTransparency = 1
@@ -842,6 +858,7 @@ local Slots = {
         local BarBgCorner = Instance.new("UICorner", BarBackground)
         BarBgCorner.CornerRadius = UDim.new(0, 2)
 
+        -- Сама тающая линия
         local ProgressBar = Instance.new("Frame")
         ProgressBar.Size = UDim2.new(1, 0, 1, 0)
         ProgressBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255) 
@@ -851,6 +868,7 @@ local Slots = {
         local BarCorner = Instance.new("UICorner", ProgressBar)
         BarCorner.CornerRadius = UDim.new(0, 2)
 
+        -- Текст названия "STREAK"
         local TitleLabel = Instance.new("TextLabel")
         TitleLabel.Size = UDim2.new(0, 140, 0, 16)
         TitleLabel.Position = UDim2.new(0, 10, 0, 1)
@@ -863,6 +881,7 @@ local Slots = {
         TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
         TitleLabel.Parent = MainBox
 
+        -- Цифра счётчика убийств (справа)
         local CountLabel = Instance.new("TextLabel")
         CountLabel.Size = UDim2.new(0, 40, 0, 26)
         CountLabel.Position = UDim2.new(0, 155, 0, 0)
@@ -875,6 +894,7 @@ local Slots = {
         CountLabel.TextXAlignment = Enum.TextXAlignment.Center
         CountLabel.Parent = MainBox
 
+        -- Анимация появления и таяния линии
         local activeTween = nil
         local function triggerKillVisuals()
             MainBox.BackgroundTransparency = 0.25
@@ -893,6 +913,7 @@ local Slots = {
             activeTween:Play()
         end
 
+        -- Плавное растворение счетчика
         local function fadeOutVisuals()
             currentStreak = 0
             local fadeInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -904,6 +925,7 @@ local Slots = {
             TweenService:Create(CountLabel, fadeInfo, {TextTransparency = 1}):Play()
         end
 
+        -- Постоянно записываем историю того, куда мы смотрели
         RunService.RenderStepped:Connect(function()
             if not getgenv().Config["KillStreak"] then return end
             
@@ -911,6 +933,7 @@ local Slots = {
             local currentTime = tick()
             local screenCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
             
+            -- Проверяем всех игроков и сохраняем их экранные позиции в историю
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= lp and player.Character and player.Character:FindFirstChild("Head") then
                     local head = player.Character.Head
@@ -918,6 +941,8 @@ local Slots = {
                     
                     if onScreen then
                         local dist = (Vector2.new(vector.X, vector.Y) - screenCenter).Magnitude
+                        
+                        -- Если навелись на голову (в пределах 160 пикселей) — записываем это событие
                         if dist <= 160 then
                             if not aimHistory[player.Name] then aimHistory[player.Name] = {} end
                             table.insert(aimHistory[player.Name], currentTime)
@@ -926,6 +951,7 @@ local Slots = {
                 end
             end
             
+            -- Чистим старые записи истории, которые вышли за рамки 0.4 секунд
             for pName, timestamps in pairs(aimHistory) do
                 for i = #timestamps, 1, -1 do
                     if currentTime - timestamps[i] > historyWindow then
@@ -936,6 +962,7 @@ local Slots = {
             end
         end)
 
+        -- Логика отслеживания смертей врагов
         local function monitorPlayer(player)
             if player == lp then return end
             
@@ -948,6 +975,7 @@ local Slots = {
                         local currentTime = tick()
                         local wasTargetedRecently = false
                         
+                        -- Проверяем буфер: был ли этот игрок в нашем прицеле за последние 0.4 сек
                         if aimHistory[player.Name] and #aimHistory[player.Name] > 0 then
                             for _, timestamp in ipairs(aimHistory[player.Name]) do
                                 if currentTime - timestamp <= historyWindow then
@@ -957,10 +985,12 @@ local Slots = {
                             end
                         end
                         
+                        -- Если ты целился в него в пределах 0.4 сек до его смерти — засчитываем твой килл!
                         if wasTargetedRecently then
                             lastKillTime = currentTime
                             currentStreak = currentStreak + 1
                             triggerKillVisuals()
+                            -- Очищаем буфер для этого челика, чтобы не сработало дважды
                             aimHistory[player.Name] = nil
                         end
                     end)
@@ -971,6 +1001,7 @@ local Slots = {
         for _, p in ipairs(Players:GetPlayers()) do monitorPlayer(p) end
         Players.PlayerAdded:Connect(monitorPlayer)
 
+        -- Постоянный чек таймера серии в фоне
         RunService.Heartbeat:Connect(function()
             if currentStreak > 0 and (tick() - lastKillTime) >= comboDuration then
                 fadeOutVisuals()
@@ -1008,9 +1039,7 @@ local Slots = {
             end
         end)
     end,
-    
     ["AA_VisualJitterSpeed"] = function() end,
-    
     ["AA_VisualJitterSpin"] = function()
         local RunService = game:GetService("RunService")
         local LocalPlayer = game.Players.LocalPlayer
@@ -1025,23 +1054,24 @@ local Slots = {
                 local hrp = char.HumanoidRootPart
                 local cam = workspace.CurrentCamera.CFrame.LookVector
                 
-                local delayTime = (getgenv().Config["JitterSpinDelay"] or 50) / 100 
-                local angleStep = getgenv().Config["JitterSpinStep"] or 90 
+                -- Получаем настройки из слайдеров (если их нет, ставим стандартные)
+                local delayTime = (getgenv().Config["JitterSpinDelay"] or 50) / 100 -- из ползунка (например, 50 = 0.5 сек)
+                local angleStep = getgenv().Config["JitterSpinStep"] or 90 -- шаг поворота в градусах
                 
+                -- Проверяем, прошло ли нужное время (например, 0.5 секунд) для прыжка направления
                 if tick() - lastTransform >= delayTime then
                     currentAngle = (currentAngle + angleStep) % 360
                     lastTransform = tick()
                 end
                 
+                -- Оставляем позицию игрока, но разворачиваем его CFrame относительно камеры на текущий угол
                 hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(cam.X, 0, cam.Z)) 
                              * CFrame.Angles(0, math.rad(currentAngle), 0)
             end
         end)
     end,
-    
     ["AA_JitterSpinDelay"] = function() end,
     ["AA_JitterSpinStep"] = function() end,
-    
     ["WORLD_TextureQuality"] = function()
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("Texture") or obj:IsA("Decal") then
@@ -1062,13 +1092,12 @@ local Slots = {
             end
         end)
     end,
-    
     ["WORLD_SkyColor"] = function()
         local Lighting = game:GetService("Lighting")
         game:GetService("RunService").RenderStepped:Connect(function()
             if getgenv().Config["SkyColor"] then
-                Lighting.Ambient = Color3.fromRGB(0, 180, 255)
-                Lighting.OutdoorAmbient = Color3.fromRGB(0, 180, 255)
+                Lighting.Ambient = Color3.fromRGB(165, 30, 255)
+                Lighting.OutdoorAmbient = Color3.fromRGB(165, 30, 255)
                 for _, obj in pairs(Lighting:GetChildren()) do
                     if obj:IsA("Sky") then
                         obj.SkyboxBk = ""
@@ -1082,7 +1111,6 @@ local Slots = {
             end
         end)
     end,
-    
     ["WORLD_NoFog"] = function()
         local Lighting = game:GetService("Lighting")
         game:GetService("RunService").RenderStepped:Connect(function()
@@ -1092,7 +1120,6 @@ local Slots = {
             end
         end)
     end,
-    
     ["WORLD_DeathParticles"] = function()
         local Players = game:GetService("Players")
         local function CreateTextEffect(char)
@@ -1136,8 +1163,7 @@ local Slots = {
             end)
         end)
     end,
-    
-    ["VISUALS_CameraFOV"] = function()
+     ["VISUALS_CameraFOV"] = function()
         local RunService = game:GetService("RunService")
         local Camera = game:GetService("Workspace").CurrentCamera
         RunService.RenderStepped:Connect(function()
@@ -1148,29 +1174,29 @@ local Slots = {
             end
         end)
     end,
-    
     ["AIM_HitboxExpander"] = function()
-        game:GetService("RunService").RenderStepped:Connect(function()
-            if not getgenv().Config["HitboxExpander"] then return end
-            
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                    player.Character.Head.Size = Vector3.new(30, 30, 30)
-                    player.Character.Head.Transparency = 0.7
-                    player.Character.Head.CanCollide = false
-                end
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if not getgenv().Config["HitboxExpander"] then return end
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                -- Увеличиваем, если включено
+                player.Character.Head.Size = Vector3.new(30, 30, 30)
+                player.Character.Head.Transparency = 0.7
+                player.Character.Head.CanCollide = false
             end
-        end)
-    end,
-    
+        end
+    end)
+end,
     ["MOVEMENT_NoclipFly"] = function()
         local RunService = game:GetService("RunService")
         local Players = game:GetService("Players")
         local lp = Players.LocalPlayer
         
-        local bv = nil 
+        local bv = nil -- Физический вектор скорости
 
         RunService.RenderStepped:Connect(function()
+            -- Если чит выключен в меню
             if not getgenv().Config["NoclipFly"] then 
                 if bv then 
                     bv:Destroy() 
@@ -1187,48 +1213,60 @@ local Slots = {
             local camera = workspace.CurrentCamera
             local speed = getgenv().Config["NoclipFlySpeed"] or 50
 
+            -- 1. ВКЛЮЧАЕМ НОУКЛИП (пролёт сквозь стены)
             for _, part in pairs(char:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
                 end
             end
 
+            -- 2. СОЗДАЕМ ВЕКТОР СКОРОСТИ
             if not bv or bv.Parent ~= hrp then
                 if bv then bv:Destroy() end
                 bv = Instance.new("BodyVelocity")
-                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge) 
+                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge) -- Даем бесконечную силу, чтобы лететь сквозь всё
                 bv.Velocity = Vector3.new(0, 0, 0)
                 bv.Parent = hrp
             end
 
-            local moveDir = hum.MoveDirection 
+            -- 3. СЧИТЫВАЕМ ДЖОЙСТИК И НАПРАВЛЕНИЕ КАМЕРЫ
+            local moveDir = hum.MoveDirection -- Идеально для мобильного джойстика и WASD
 
             if moveDir.Magnitude > 0 then
+                -- Вектор взгляда камеры (куда наведён прицел/экран)
                 local camLook = camera.CFrame.LookVector
+                
+                -- Базовое направление движения берем от джойстика
                 local finalVelocity = moveDir
+                
+                -- Считаем, насколько джойстик нажат "вперед" относительно взгляда камеры
                 local forwardDot = moveDir:Dot(Vector3.new(camLook.X, 0, camLook.Z).Unit)
                 
                 if forwardDot > 0.5 then
+                    -- Если джойстик тянут вперед, плавно добавляем наклон камеры (Y)
+                    -- Смотришь вверх — летишь вверх, смотришь вниз — летишь под землю
                     finalVelocity = Vector3.new(moveDir.X, camLook.Y * forwardDot, moveDir.Z)
                 elseif forwardDot < -0.5 then
+                    -- Если джойстик тянут назад, инвертируем высоту камеры
                     finalVelocity = Vector3.new(moveDir.X, -camLook.Y * math.abs(forwardDot), moveDir.Z)
                 end
                 
+                -- Задаем скорость нашему физическому телу
                 bv.Velocity = finalVelocity.Unit * speed
             else
+                -- Если джойстик отпущен — персонаж мертво зависает в воздухе и не падает
                 bv.Velocity = Vector3.new(0, 0, 0)
             end
         end)
     end,
-    
     ["MOVEMENT_NoclipFlySpeed"] = function() end,
-    
     ["AIM_MassKill"] = function()
         local RunService = game:GetService("RunService")
         local Players = game:GetService("Players")
         local lp = Players.LocalPlayer
 
         RunService.RenderStepped:Connect(function()
+            -- Если функция выключена в меню — возвращаем всех на место
             if not getgenv().Config["MassKill"] then 
                 for _, player in ipairs(Players:GetPlayers()) do
                     if player ~= lp and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -1243,52 +1281,63 @@ local Slots = {
             
             local camCFrame = workspace.CurrentCamera.CFrame
 
+            -- Каждую миллисекунду стягиваем врагов
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= lp and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
                     local targetHrp = player.Character.HumanoidRootPart
                     local targetHum = player.Character.Humanoid
                     
+                    -- Стягиваем только живых
                     if targetHum.Health > 0 then
+                        -- Ставим игроков кучкой в 4 блоках перед камерой, чуть правее и ниже
                         local targetPosition = camCFrame * CFrame.new(2, -1.2, -4)
                         
+                        -- ОТКЛЮЧАЕМ КОЛЛИЗИИ ПРАВИЛЬНО (исправлено)
                         for _, part in pairs(player.Character:GetDescendants()) do
                             if part:IsA("BasePart") then 
                                 part.CanCollide = false 
                             end
                         end
                         
+                        -- Отключаем встроенную физику Humanoid локально, чтобы модельку не штормило
                         targetHum:ChangeState(Enum.HumanoidStateType.Physics)
+                        
+                        -- Насильно переписываем их позицию на твоем экране
                         targetHrp.CFrame = targetPosition
                         targetHrp.Anchored = true 
                     else
+                        -- Если умер — отпускаем труп
                         targetHrp.Anchored = false
                     end
                 end
             end
         end)
     end,
-    
-    ["AIM_Silent360"] = function()
+        ["AIM_Silent360"] = function()
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
         local Camera = workspace.CurrentCamera
         local RunService = game:GetService("RunService")
 
+        -- Функция проверки видимости (сквозь стены)
         local function IsVisible(character, targetPart)
-            if not getgenv().Config["CheckWall"] then return true end 
+            if not getgenv().Config["CheckWall"] then return true end -- Если проверка стен выключена — лупим сквозь них
             local parts = Camera:GetPartsObscuringTarget({targetPart.Position}, {LocalPlayer.Character, character})
             return #parts == 0
         end
 
+        -- Поиск самой близкой жертвы в радиусе 360 градусов
         local function GetClosestPlayer360()
             local closestTarget = nil
-            local shortestDistance = math.huge 
+            local shortestDistance = math.huge -- Ищем по минимальной дистанции в 3D пространстве
 
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+                    -- Наводимся строго в голову, как ты просил
                     local head = player.Character:FindFirstChild("Head")
                     
                     if head then
+                        -- Считаем чистое расстояние между тобой и врагом в мире
                         local distance = (LocalPlayer.Character.HumanoidRootPart.Position - head.Position).Magnitude
                         
                         if distance < shortestDistance and IsVisible(player.Character, head) then
@@ -1307,35 +1356,41 @@ local Slots = {
 
             local targetHead = GetClosestPlayer360()
             if targetHead then
+                -- Полный игнор плавности (Smoothness). Наводка происходит за 1 кадр (мгновенный флик)
                 Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
             end
         end)
     end,
-    
     ["AIM_CheckWall"] = function() end,
     
-    ["ESP_Skeleton"] = function()
+        ["ESP_Skeleton"] = function()
         local Players = game:GetService("Players")
         local Camera = workspace.CurrentCamera
         local RunService = game:GetService("RunService")
         local LocalPlayer = Players.LocalPlayer
 
+        -- Список пар костей, которые нужно соединить линиями
         local BonePairs = {
+            -- Позвоночник / Голова
             {"Head", "UpperTorso"},
             {"UpperTorso", "LowerTorso"},
             
+            -- Левая рука
             {"UpperTorso", "LeftUpperArm"},
             {"LeftUpperArm", "LeftLowerArm"},
             {"LeftLowerArm", "LeftHand"},
             
+            -- Правая рука
             {"UpperTorso", "RightUpperArm"},
             {"RightUpperArm", "RightLowerArm"},
             {"RightLowerArm", "RightHand"},
             
+            -- Левая нога
             {"LowerTorso", "LeftUpperLeg"},
             {"LeftUpperLeg", "LeftLowerLeg"},
             {"LeftLowerLeg", "LeftFoot"},
             
+            -- Правая нога
             {"LowerTorso", "RightUpperLeg"},
             {"RightUpperLeg", "RightLowerLeg"},
             {"RightLowerLeg", "RightFoot"}
@@ -1344,9 +1399,11 @@ local Slots = {
         local function CreateSkeleton(player)
             if player == LocalPlayer then return end
             
+            -- Массив для хранения графических линий этого игрока
             local Lines = {}
             for i = 1, #BonePairs do
                 local line = Drawing.new("Line")
+                -- СРАЗУ ДЕЛАЕМ БЕЛЫМ (потом поменяем на фиолетовый)
                 line.Color = Color3.fromRGB(255, 255, 255) 
                 line.Thickness = 1.5
                 line.Transparency = 1
@@ -1356,6 +1413,7 @@ local Slots = {
 
             local connection
             connection = RunService.RenderStepped:Connect(function()
+                -- Проверка чекбокса в меню
                 if not getgenv().Config["Skeleton"] then
                     for _, line in ipairs(Lines) do line.Visible = false end
                     return
@@ -1369,9 +1427,11 @@ local Slots = {
                         local line = Lines[id]
 
                         if partA and partB then
+                            -- Переводим 3D координаты суставов в 2D экранные координаты
                             local posA, onScreenA = Camera:WorldToViewportPoint(partA.Position)
                             local posB, onScreenB = Camera:WorldToViewportPoint(partB.Position)
 
+                            -- Если обе части тела видны на экране — рисуем кость
                             if onScreenA and onScreenB then
                                 line.From = Vector2.new(posA.X, posA.Y)
                                 line.To = Vector2.new(posB.X, posB.Y)
@@ -1384,6 +1444,7 @@ local Slots = {
                         end
                     end
                 else
+                    -- Если игрок умер или вышел
                     for _, line in ipairs(Lines) do line.Visible = false end
                     if not Players:FindFirstChild(player.Name) then
                         for _, line in ipairs(Lines) do line:Remove() end
@@ -1393,10 +1454,75 @@ local Slots = {
             end)
         end
 
+        -- Запускаем для всех текущих и будущих игроков
         for _, p in ipairs(Players:GetPlayers()) do CreateSkeleton(p) end
         Players.PlayerAdded:Connect(CreateSkeleton)
     end,
-        ["MENU_ThemeSelect"] = function() 
+    ["VISUALS_RSC"] = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local TextChatService = game:GetService("TextChatService")
+        local lp = Players.LocalPlayer
+
+        getgenv().RSC_Users = {} -- Глобальный список софтеров
+
+        -- Функция отправки скрытого пинга в сеть сервера
+        local function sendPing()
+            if not getgenv().Config["RSC"] then return end
+            -- Отправляем в локальный текстовый поток скрытый маркер нашего софта
+            pcall(function()
+                if TextChatService and TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then
+                    -- Отправляем системный пакет, который обычные люди в чате не видят (так как он пустой или зашифрован)
+                    -- Но наш скрипт его поймает
+                    TextChatService.TextChannels.RBXGeneral:SendAsync("	[RSC_PING_NEVERLOSE]	")
+                end
+            end)
+        end
+
+        -- Каждые 5 секунд кричим в скрытый канал, что мы на сервере
+        task.spawn(function()
+            while task.wait(5) do
+                if getgenv().Config["RSC"] then
+                    sendPing()
+                else
+                    table.clear(getgenv().RSC_Users)
+                end
+            end
+        end)
+
+        -- Ловим чужие пинги софтеров на этом сервере
+        if TextChatService and TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then
+            TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(message)
+                if not getgenv().Config["RSC"] then return end
+                
+                -- Если сообщение содержит наш секретный маркер и это не мы сами
+                if message.Text == "	[RSC_PING_NEVERLOSE]	" and message.TextSource then
+                    local sender = Players:GetPlayerByUserId(message.TextSource.UserId)
+                    if sender and sender ~= lp then
+                        -- Добавляем софтера в вайтлист, если его там еще нет
+                        if not table.find(getgenv().RSC_Users, sender.Name) then
+                            table.insert(getgenv().RSC_Users, sender.Name)
+                            
+                            -- Визуальный эффект: красим его чамс в фиолетовый, показывая что он "наш"
+                            if sender.Character and sender.Character:FindFirstChild("My_FF_XRay") then
+                                sender.Character.My_FF_XRay.FillColor = Color3.fromRGB(165, 30, 255)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+
+        -- Очистка списка, если игрок вышел с сервера
+        Players.PlayerRemoving:Connect(function(player)
+            local index = table.find(getgenv().RSC_Users, player.Name)
+            if index then
+                table.remove(getgenv().RSC_Users, index)
+            end
+        end)
+    end,
+
+    ["MENU_ThemeSelect"] = function() 
         -- Просто заглушка для конфига дропдауна
     end,
 
@@ -1413,28 +1539,27 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/ref
             ]],
             
             ["Красная"] = [[
-              loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/red.lua"))()
-
+loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/Red.lua"))()
                 print("Загружена Красная тема!")
             ]],
             
             ["Синяя"] = [[
-                -- СЮДА ВСТАВЛЯЕШЬ ПОЛНУЮ КОПИЮ СВОЕГО СКРИПТА, НО С СИНИМИ ЦВЕТАМИ
-                print("Загружена Синяя тема!")
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/blue.lua"))()
+                print("Загружена Фиолетовая тема!")
             ]],
             
             ["Зелёная"] = [[
-                -- КОД ЗЕЛЁНОГО СОФТА
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/green.lua"))()
                 print("Загружена Зелёная тема!")
             ]],
             
             ["Жёлтая"] = [[
-                -- КОД ЖЁЛТОГО СОФТА
+              loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/yellow.lua"))()
                 print("Загружена Жёлтая тема!")
             ]],
             
             ["Черная"] = [[
-                -- КОД ЧЁРНОГО СОФТА
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/refs/heads/main/black.lua"))()
                 print("Загружена Чёрная тема!")
             ]]
         }
@@ -1482,10 +1607,9 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/dllebo/Violet.lua/ref
             end
         end)
     end,
-    
+
 }
 
--- Генерация элементов GUI на основе слотов
 for slotName, slotCode in pairs(Slots) do
     if slotCode ~= nil then
         local parsed = string.split(slotName, "_")
@@ -1500,6 +1624,8 @@ for slotName, slotCode in pairs(Slots) do
             BuildSlider(tab, func, 1, 30, 5)
         elseif func == "Distance" then
             BuildSlider(tab, func, 5, 100, 25)
+        elseif func == "ThemeSelect" then
+            BuildDropdown(tab, func, {"Фиолетовая", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
         elseif func == "VisualJitterSpin" then
             BuildCheckbox(tab, func)
         elseif func == "NoclipFly" then
@@ -1518,8 +1644,6 @@ for slotName, slotCode in pairs(Slots) do
             BuildSlider(tab, func, 50, 400, 70)
         elseif func == "Hitbox" then
             BuildDropdown(tab, func, {"Head", "HumanoidRootPart", "LowerTorso"})
-        elseif func == "ThemeSelect" then
-            BuildDropdown(tab, func, {"Фиолетовая", "Красная", "Синяя", "Зелёная", "Жёлтая", "Черная"})
         else
             BuildCheckbox(tab, func)
         end
@@ -1528,28 +1652,16 @@ for slotName, slotCode in pairs(Slots) do
     end
 end
 
--- Инициализация первой активной вкладки при запуске скрипта
-local firstTabName = nil
 for tabName, _ in pairs(CreatedTabs) do
-    firstTabName = tabName
-    break
-end
-
-if firstTabName then
-    for _, btn in ipairs(TabContainer:GetChildren()) do
-        if btn:IsA("TextButton") then
-            if btn.Name == "Tab_" .. firstTabName then
-                btn.TextColor3 = Color3.fromRGB(0, 180, 255)
-            else
-                btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    local btn = TabContainer:FindFirstChild("Tab_" .. tabName)
+    if btn then
+        btn.TextColor3 = Color3.fromRGB(165, 30, 255)
+        if RegisteredElements[tabName] then
+            for _, frame in ipairs(RegisteredElements[tabName]) do
+                frame.Parent = ScrollContent
+                frame.Visible = true
             end
         end
-    end
-    
-    if RegisteredElements[firstTabName] then
-        for _, frame in ipairs(RegisteredElements[firstTabName]) do
-            frame.Parent = ScrollContent
-            frame.Visible = true
-        end
+        break
     end
 end
